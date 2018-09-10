@@ -19,9 +19,9 @@
     AVCaptureStillImageOutput *_stillImageOutput;//静态图片输出
     BOOL _deviceAuthorized;//相机是否授权
     dispatch_queue_t _videoQueue;
+    CGFloat _captureZoom;
 }
 @property (nonatomic, strong) CMMotionManager *motionManager;
-@property (nonatomic, assign) CGFloat videoZoomFactor;
 
 @end
 @implementation ZBCameraOperationManager
@@ -38,7 +38,7 @@
 - (instancetype)init {
     if (self = [super init]) {
         if (!_videoQueue) {
-            _videoQueue = dispatch_queue_create("cn.tongdun.VideoQueue", DISPATCH_QUEUE_SERIAL);
+            _videoQueue = dispatch_queue_create("com.zeinber.VideoQueue", DISPATCH_QUEUE_SERIAL);
         }
         if (!_session) {
             _session = [[AVCaptureSession alloc] init];
@@ -61,10 +61,10 @@
 //初始化camera
 - (void)initializeCameraWithPreview:(UIImageView *)preview {
     if (_deviceAuthorized) {
-//        self.preview = preview;
         ///添加缩放手势
         UIPinchGestureRecognizer *pinchGestureRecognizer = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(pinchView:)];
         [preview addGestureRecognizer:pinchGestureRecognizer];
+        _captureZoom = 1;
 
         [_captureVideoPreviewLayer setVideoGravity:AVLayerVideoGravityResizeAspectFill];
         _captureVideoPreviewLayer.frame = preview.bounds;
@@ -74,7 +74,6 @@
         NSArray *devices = [AVCaptureDevice devices];
         if (devices.count == 0) {
             [self showAlertToUserWithTitle:@"提示" Message:@"未开启相机授权\n请您进行以下操作：设置->隐私->相机，打开App相机权限"];
-//            self.cameraState = KCameraStateDisable;
             return;
         }
         
@@ -277,27 +276,41 @@
 
 #pragma mark - gesture
 - (void)pinchView:(UIPinchGestureRecognizer *)sender {
+    if (sender.state == UIGestureRecognizerStateBegan) {
+        sender.scale = _captureZoom;
+    }else if (sender.state == UIGestureRecognizerStateEnded) {
+        if (sender.scale < 1) {
+            _captureZoom = 1;
+        }else if (sender.scale > [self maxZoomFactor]) {
+            _captureZoom = [self maxZoomFactor];
+        }else {
+            _captureZoom = [NSString stringWithFormat:@"%.2lf",sender.scale].floatValue;
+        }
+    }
     if (sender.state == UIGestureRecognizerStateBegan || sender.state == UIGestureRecognizerStateChanged) {
-        [self cameraBackgroundDidChangeZoom:sender.scale];
-//        sender.scale = 1;
+        [self cameraBackgroundDidChangeZoom:sender.scale pinchView:sender];
     }
 }
 
-// 数码变焦 1-3倍
-- (void)cameraBackgroundDidChangeZoom:(CGFloat)zoom {
-    NSLog(@"zoom:%lf",zoom);
-    self.videoZoomFactor = zoom;
-    CGFloat maxZoomFactor = [self choseCamera].activeFormat.videoMaxZoomFactor;
-    if (self.videoZoomFactor < 1) {
-        self.videoZoomFactor = 1;
-    }else if (self.videoZoomFactor > maxZoomFactor) {
-        self.videoZoomFactor = maxZoomFactor;
-    }
+- (CGFloat)maxZoomFactor {
+    return [self choseCamera].activeFormat.videoMaxZoomFactor > 3 ? 3 : [self choseCamera].activeFormat.videoMaxZoomFactor;
+}
 
+// 数码变焦 1-3倍
+- (void)cameraBackgroundDidChangeZoom:(CGFloat)zoom pinchView:(UIPinchGestureRecognizer *)sender {
     AVCaptureDevice *captureDevice = [self choseCamera];
+    CGFloat maxZoomFactor = [self maxZoomFactor];
+    if (zoom < 1) {
+        zoom = 1;
+    }else if (zoom > maxZoomFactor) {
+        zoom = maxZoomFactor;
+    }
+    NSLog(@"\nzoom:%lf\nstate:%ld",zoom,(long)sender.state);
     NSError *error;
     if ([captureDevice lockForConfiguration:&error]) {
-        [captureDevice rampToVideoZoomFactor:self.videoZoomFactor withRate:20];
+        captureDevice.videoZoomFactor = zoom;
+    }else {
+        // Handle the error appropriately.
     }
 }
 

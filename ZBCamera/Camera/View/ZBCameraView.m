@@ -28,6 +28,23 @@
         //    [imagePreview layoutIfNeeded];
         _imagePreview = imagePreview;
         
+        UIImageView *imageResultView = [[UIImageView alloc] init];
+        [self addSubview:imageResultView];
+        imageResultView.translatesAutoresizingMaskIntoConstraints = NO;
+        NSLayoutConstraint *imageResult_topLy = [NSLayoutConstraint constraintWithItem:imageResultView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeTop multiplier:1.0f constant:0];
+        [self addConstraint:imageResult_topLy];
+        NSLayoutConstraint *imageResult_leftLy = [NSLayoutConstraint constraintWithItem:imageResultView attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeLeft multiplier:1.0f constant:0];
+        [self addConstraint:imageResult_leftLy];
+        NSLayoutConstraint *imageResult_bottomLy = [NSLayoutConstraint constraintWithItem:imageResultView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeBottom multiplier:1.0f constant:0];
+        [self addConstraint:imageResult_bottomLy];
+        NSLayoutConstraint *imageResult_rightLy = [NSLayoutConstraint constraintWithItem:imageResultView attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self attribute:NSLayoutAttributeRight multiplier:1.0f constant:0];
+        [self addConstraint:imageResult_rightLy];
+        imageResultView.userInteractionEnabled = NO;
+        imageResultView.hidden = YES;
+        imageResultView.contentMode = UIViewContentModeScaleAspectFit;
+        //    [imageResultView layoutIfNeeded];
+        _imageResultView = imageResultView;
+        
         UIView *bottomBgView = [[UIView alloc] init];
         [self addSubview:bottomBgView];
         bottomBgView.translatesAutoresizingMaskIntoConstraints = NO;

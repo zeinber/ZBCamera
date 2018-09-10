@@ -12,6 +12,7 @@
 @property (nonatomic, strong) UIButton *cameraToggleButton;//摄像头切换
 @property (nonatomic, strong) UIButton *flashToggleButton;//闪光灯控制
 @property (nonatomic, strong) UIImageView *imagePreview;//拍照取景显示
+@property (nonatomic, strong) UIImageView *imageResultView;//拍照结果显示
 @property (nonatomic, strong) UIView *photoBar;//拍照dock
 @property (nonatomic, strong) UIButton *canceOrCloseButton;//关闭按钮
 @property (nonatomic, strong) UIButton *sureImageButton;//选择照片

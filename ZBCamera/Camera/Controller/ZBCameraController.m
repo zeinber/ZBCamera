@@ -89,11 +89,15 @@
         [self.cameraView.canceOrCloseButton setTitle:@"关闭" forState:UIControlStateNormal];
         self.cameraView.photoCaptureButton.hidden = NO;
         self.cameraView.sureImageButton.hidden = YES;
+        self.cameraView.imageResultView.hidden = YES;
+        self.cameraView.imagePreview.hidden = NO;
         [_cameraManager startCaptureImage];
     }else {
         [self.cameraView.canceOrCloseButton setTitle:@"取消" forState:UIControlStateNormal];
         self.cameraView.photoCaptureButton.hidden = YES;
         self.cameraView.sureImageButton.hidden = NO;
+        self.cameraView.imageResultView.hidden = NO;
+        self.cameraView.imagePreview.hidden = YES;
         [_cameraManager stopCaptureImageWithIsCallBack:YES];
     }
 }
@@ -172,6 +176,7 @@
 - (void)didFinishPickWithImage:(UIImage *)image {
     _isTakingPhoto = NO;
     _chooseImage = image;
+    self.cameraView.imageResultView.image = image;
     [self setUpTabBar];
 }
 
